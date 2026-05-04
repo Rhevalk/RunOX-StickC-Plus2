@@ -1,9 +1,0 @@
-{
-  "additionalFiles": "../..,../..,../..,../..,../..,../..,../..,../..,../..,../..",
-  "compiler.optimization_flags": "-Os",
-  "customBuildProperties": "",
-  "fqbn": "esp32:esp32:esp32s3",
-  "hardwareFolders": "/home/arcshzen/.arduino15/packages/esp32/hardware/esp32/3.3.8,/home/arcshzen/.arduino15/packages/esp32/hardware/esp32/3.3.8",
-  "otherLibrariesFolders": "/home/arcshzen/Arduino/libraries",
-  "sketchLocation": "/home/arcshzen/Documents/Arduino/sketch/RunOX-M5Stack"
-}

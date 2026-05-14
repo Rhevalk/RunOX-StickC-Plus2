@@ -1,4 +1,4 @@
-#include "clock.h"
+#include "app_clock.h"
 
 void app_clock() {
     // Init
@@ -13,7 +13,13 @@ void app_clock() {
         // Exit
         if (M5.BtnB.pressedFor(BTN_EXIT_TIMEOUT_MS)) break; 
 
-        if (M5.BtnB.wasClicked()) { forceOn = !forceOn; isOn = true; d->setBrightness(DSP_BRIGHTNESS_LVL); lastUpdate = 0; }
+        if (M5.BtnB.wasClicked()) {
+          forceOn = !forceOn; 
+          isOn = true; 
+          d->wakeup(); 
+          d->setBrightness(DSP_BRIGHTNESS_LVL); 
+          lastUpdate = 0; 
+        }
 
         if (!forceOn) {
             M5.Imu.update();
@@ -22,10 +28,14 @@ void app_clock() {
             fAz = (0.2f * az) + (0.8f * fAz); fAx = (0.2f * ax) + (0.8f * fAx);
         
             if (!isOn && fAz >= 0.8f && abs(fAx) >= 0.3f) {
-                isOn = true; d->setBrightness(DSP_BRIGHTNESS_LVL); 
+                isOn = true; 
+                d->wakeup(); 
+                d->setBrightness(DSP_BRIGHTNESS_LVL);
             } 
-            else if (isOn && (fAz <= 0.4f || abs(fAx) <= 0.05f)) {
-                isOn = false; d->setBrightness(0); 
+            else if (isOn && (fAz <= 0.4f || abs(fAx) <= 0.15f)) {
+                isOn = false; 
+                d->setBrightness(0); 
+                d->sleep();          
             }
         }
 

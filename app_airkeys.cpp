@@ -1,4 +1,4 @@
-#include "air_keys.h"
+#include "app_airkeys.h"
 #include <HijelHID_BLEKeyboard.h>
 
 static HijelHID_BLEKeyboard keyboard("RunOX Keys", "RunOX");
@@ -8,8 +8,10 @@ void app_airkeys() {
 
     const char* modeOptions[] = {"Presenter", "Audio Player"};
     
-    int8_t modeIndex = ui_picker(modeOptions, 2);
+    int modeIndex = ui_picker(modeOptions, 2);
     if (modeIndex == -1) return;
+
+    d->clear();
 
     keyboard.begin();
 
@@ -22,7 +24,6 @@ void app_airkeys() {
 
         if (currentStatus != lastStatus) {
             d->startWrite();
-            d->fillScreen(THM_BG);
             d->setCursor(20, 10);
             if (currentStatus) {
                 d->setTextColor(GREEN);
@@ -48,7 +49,7 @@ void app_airkeys() {
             }
         }
         vTaskDelay(pdMS_TO_TICKS(SYS_LOOP_INTERVAL_MS));
-    }
-    
-    keyboard.end(); 
+    }  
+    keyboard.clearBonds();
+    keyboard.kill(); 
 }

@@ -1,11 +1,9 @@
-#include "air_mouse.h"
+#include "app_airmouse.h"
 #include <HijelHID_BLEMouse.h>
 
 static HijelBLEMouse mouse("RunOX Mouse", "RunOX");
 
 void app_airmouse() {
-    d->setTextSize(1);
-
     float f_gx = 0, f_gz = 0;
     float alpha = 0.4;
     float sensitivity = 0.6;
@@ -45,7 +43,6 @@ void app_airmouse() {
                 mouse.move(dx, dy);
             }
 
-            d->setCursor(0, 0);
             d->print("x:");
             d->print((int)gx); 
             d->println("   ");
@@ -62,6 +59,7 @@ void app_airmouse() {
         }
         vTaskDelay(pdMS_TO_TICKS(20));
     }
-    mouse.beforeSleep(); 
+    mouse.clearBonds();
+    NimBLEDevice::stopAdvertising();
     NimBLEDevice::deinit(true);
 }

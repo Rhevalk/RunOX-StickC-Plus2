@@ -18,7 +18,7 @@ void setup() {
 }
 
 void loop() { 
-    app_func_t selectedApp = app_launcher();
+    app_func_t selectedApp = launcher();
     
     if (selectedApp != nullptr) sys_execute_app(selectedApp); 
 }

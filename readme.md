@@ -1,7 +1,7 @@
 CATATAN:
 tommbol pwr tidak akan otomatis mematikan sistem, dia perlu kembli ke launcher dan memasuki powr menu
 
-
+IR Power  NEC2  C12FE817
 “No animations. No background tasks. No wasted CPU. Every cycle is predictable.”
 “If it doesn’t need to run, it doesn’t exist
 
@@ -24,9 +24,6 @@ tommbol pwr tidak akan otomatis mematikan sistem, dia perlu kembli ke launcher d
     - Sound Record (SPM1423-PDM MIC)
     - IR Tx
     - Voice Recognition
-    - Settings
-        >> Brightness
-        >> CPU Freq
 
 # Button Func
 Click (A)      : select
@@ -39,7 +36,7 @@ Hold B 1s      : opt 1
 Hold B 2s      : Exit App
 
 Hold C 1s      : opt 1
-Hold C 2s      : Power Menu
+Hold C 6s      : Power Menu
 
 # RunOX-M5Stick Plus 2
 

@@ -9,7 +9,6 @@
 
 /*========BUTTON=========*/
 #define BTN_EXIT_TIMEOUT_MS  2000
-#define BTN_POWER_TIMEOUT_MS 2000
 
 /*========DISPLAY========*/
 #define DSP_BRIGHTNESS_LVL  1
@@ -19,7 +18,7 @@
 #define DSP_CENTER_X        120
 #define DSP_CENTER_Y        67
 
-/*=========THM=========*/
+/*==========THM==========*/
 #define THM_BG          BLACK
 #define THM_FG          WHITE
 

@@ -23,6 +23,6 @@ const char* const appNames[] = {
     #undef APP_ENTRY
 };
 
-constexpr uint8_t itemCount = sizeof(appNames) / sizeof(appNames[0]);
+constexpr int itemCount = sizeof(appNames) / sizeof(appNames[0]);
 
-app_func_t app_launcher();   
+app_func_t launcher();   

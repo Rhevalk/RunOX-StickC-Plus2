@@ -16,10 +16,6 @@ void sys_execute_app(void (*app_func)()) {
     d->clear();
 }
 
-/**
- * @brief Fungsi universal untuk memilih item dari daftar (mendukung scrolling).
- * @return int8_t Index yang dipilih (0 to count-1), atau -2 jika user menekan BACK.
- */
 int ui_picker(const char* const* options, int count) {
     int currentIndex = 0;
     bool redraw = true;

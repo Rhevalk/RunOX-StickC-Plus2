@@ -1,5 +1,9 @@
-#include "app_clock.h"
-#include "app_picotop.h"
-#include "app_airmouse.h"
-#include "app_airkeys.h"
-//#include "app_irremote.h"
+#pragma once
+
+#include "config.h"
+#include "system.h"
+
+void app_clock();
+void app_picotop();
+void app_airkeys();
+void app_airmouse();

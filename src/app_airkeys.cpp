@@ -1,4 +1,4 @@
-#include "app_airkeys.h"
+#include "../modules.h"
 #include <HijelHID_BLEKeyboard.h>
 
 static HijelHID_BLEKeyboard keyboard("RunOX Keys", "RunOX");

@@ -11,7 +11,7 @@
 #define BTN_EXIT_TIMEOUT_MS  2000
 
 /*========DISPLAY========*/
-#define DSP_BRIGHTNESS_LVL  1
+#define DSP_BRIGHTNESS_LVL  50
 
 #define DSP_WIDTH           240
 #define DSP_HEIGHT          135

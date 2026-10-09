@@ -1,4 +1,4 @@
-#include "app_airmouse.h"
+#include "../modules.h"
 #include <HijelHID_BLEMouse.h>
 
 static HijelBLEMouse mouse("RunOX Mouse", "RunOX");
@@ -6,7 +6,7 @@ static HijelBLEMouse mouse("RunOX Mouse", "RunOX");
 void app_airmouse() {
     float f_gx = 0, f_gz = 0;
     float alpha = 0.4;
-    float sensitivity = 0.6;
+    float sensitivity = 0.4;
 
     bool isStreaming = true;
 
@@ -42,6 +42,8 @@ void app_airmouse() {
             if (mouse.isPaired() && (dx != 0 || dy != 0)) {
                 mouse.move(dx, dy);
             }
+
+            d->setCursor(0, 0);
 
             d->print("x:");
             d->print((int)gx); 

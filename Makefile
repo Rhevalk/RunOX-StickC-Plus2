@@ -6,6 +6,3 @@ compile:
 
 upload:
 	arduino-cli upload -p $(PORT) --fqbn $(FQBN) .
-
-build:
-	arduino-cli compile --fqbn $(FQBN) . && arduino-cli upload -p $(PORT) --fqbn $(FQBN) .

@@ -1,15 +1,10 @@
 # RunOX-M5Stick Plus 2
 
-> **"No animations. No background tasks. No wasted CPU. Every cycle is predictable."**
-> 
+**RunOX** adalah *firmware* untuk M5StickC Plus2 yang dibangun menggunakan pola **Modular App Framework**. Konsep arsitektur ini memisahkan kodenya menjadi tiga komponen utama:
 
-**RunOX (Runtime Operating Executive)** adalah *minimalist operating executive* yang dirancang khusus untuk **M5StickC Plus2**. Berjalan di atas **FreeRTOS** dengan abstraksi **M5Unified**, sistem ini mengusung konsep *single-app execution* dengn tujuan menghilangkan *multitasking* di lapisan dasar demi mencapai efisiensi ekstrem, stabilitas tinggi, dan kontrol penuh tanpa beban *overhead*
-
----
-
-Sistem RunOX memungkinkan Anda untuk mengganti **Launcher** secara *custom* dan melakukan lepas-pasang (**Plug-and-Play**) modul **Apps**. Namun, **Base** bersifat statis.
-
-*Untuk melakukan modifikasi pada Base, Anda diwajibkan menyesuaikan ulang struktur Launcher dan format standar Apps yang digunakan.*
+- **Core System:** Mengani interaksi hardware dasar dan inisialisasi awal.
+- **Registry Layer:** Mengelola tabel pendaftaran (*entry*) modul aplikasi secara bersih tanpa perlu memodifikasi *core logic*.
+- **App Modules:** Tempat penyimpanan logika aplikasi terisolasi yang bisa dipasang atau dilepas dengan rapi.
 
 ---
 
@@ -54,27 +49,30 @@ arduino-cli lib install "M5GFX"
 Gunakan perintah ini di dalam direktori proyek RunOX:
 
 ```bash
-arduino-cli compile --fqbn esp32:esp32:m5stick_c_plus2 .
+make compile
 ```
 
 **D. Unggah (Upload)**
 Ganti `PORT` dengan alamat port perangkat Anda (misal: `/dev/ttyUSB0` atau `/dev/ttyACM0` atau `COM3`):
 
 ```bash
-arduino-cli upload -p PORT --fqbn esp32:esp32:m5stick_c_plus2 .
+make upload
 ```
 
-## Arsitektur Sistem (Suckless Style)
+## Arsitektur Sistem
 
-RunOX membagi tanggung jawab sistem ke dalam tiga lapisan modular yang kaku namun efisien:
+RunOX membagi tanggung jawab sistem ke dalam tiga lapisan:
 
 **1. The Base (Hardware Abstraction Layer)**
+
 Dibangun di atas **Arduino ESP32 Framework** dan **M5Unified**. Base berfungsi sebagai fondasi statis yang menangani komunikasi *low-level* dengan periferal. Base bersifat *immutable* bagi lapisan aplikasi untuk menjaga integritas sistem.
 
 **2. The Launcher (System Gateway)**
+
 Aplikasi manajer yang berfungsi sebagai *entry point*. Launcher dipanggil secara otomatis oleh Base saat *cold boot* atau ketika sebuah aplikasi melepaskan kendali (*exit*).
 
 **3. The Application (User Space)**
+
 Lapisan tertinggi dengan kontrol penuh. Developer memiliki akses mutlak ke siklus CPU dan perangkat keras. **Catatan:** Manajemen sumber daya (SRAM, PSRAM, daya, dan periferal) adalah tanggung jawab penuh pengembang aplikasi.
 
 > **Catatan:** Tanggung jawab manajemen sumber daya (memori, periferal, daya) sepenuhnya dilepas kepada pembuat lapisan Aplikasi.
@@ -82,15 +80,16 @@ Lapisan tertinggi dengan kontrol penuh. Developer memiliki akses mutlak ke siklu
 
 ---
 
-## Struktur File
+### Struktur File & Arsitektur
 
-RunOX menggunakan pola modular untuk manajemen memori yang efisien dan interkoneksi antar *app-module* yang bersih.
+RunOX menggunakan pola arsitektur modular untuk menjaga pemisahan kode (*decoupling*) antara sistem utama, tabel pendaftaran aplikasi, dan modul-modul fitur.
 
-- **`RunOX-M5Stack.ino`**: *Executive Entry Point*. Menangani inisialisasi hardware (`M5.begin()`) dan logika *main app switcher*.
-- **`config.h`**: *Single source of truth* untuk definisi konstanta global (Clock Speed, Intervals, Pinout).
-- **`system.h`**: Interface jembatan (*header*) agar aplikasi dapat mengakses fungsi global dan API sistem. Deklarasi Luncher diletakan disini, pastikan fungsi Luncher tersebut ada jika anda memodifikasi atau mengganti luncher bawaan.
-- **`entries.x`**: Registrasi daftar aplikasi untuk launcher menggunakan teknik *link-time optimization*.
-- **`modules.h`**: *Centralized header inclusion* untuk mempermudah manajemen dependensi antar modul.
+- **RunOX-M5Stack.ino**: Executive Entry Point. Menangani inisialisasi awal hardware (`M5.begin()`) dan mengeksekusi *main loop*.
+- **system.h / system.cpp**: Interface jembatan dan implementasi API sistem utama. Mengatur logika core, state global, serta deklarasi Launcher. Jika Anda mengganti Launcher bawaan, pastikan fungsi Launcher tersebut dideklarasikan di sini.
+- **config.h**: *Single source of truth* untuk definisi konstanta global (Clock speed, intervals, pinout, dll).
+- **entries.x**: Tabel registrasi daftar modul aplikasi yang terhubung ke Launcher menggunakan teknik Macro X-Macro / table-driven registry.
+- **modules.h**: Centralized header inclusion untuk mengimpor seluruh header modul aplikasi dari folder `src/`.
+- **src/**: Folder direktori utama yang menampung seluruh implementasi modul aplikasi (dulu `app_*`) dan komponen launcher secara terisolasi.
 
 ---
 
@@ -101,7 +100,7 @@ Efisiensi RunOX diatur melalui **`config.h`**. Pengguna dapat menyesuaikan profi
 | **Profil** | **Clock Speed** | **Loop Interval** | **Karakteristik** |
 | --- | --- | --- | --- |
 | **Standard** | 80 MHz | 100 ms | Keseimbangan daya dan responsivitas. |
-| **Performance** | 240 MHz | 10 ms | Responsivitas maksimal  |
+| **Performance** | 240 MHz | 10 ms | Responsivitas maksimal |
 | **PowerSave** | 10 MHz | 200 ms | Konsumsi daya minimal untuk tugas pasif. |
 
 > **Peringatan Teknis:** Penggunaan Clock Speed 10MHz sangat tidak disarankan untuk aplikasi dengan komputasi intensif atau komunikasi bus yang ketat (I2C/SPI) karena risiko ketidakstabilan *timing* sistem
@@ -140,36 +139,33 @@ RunOX menggunakan arsitektur **Sequential Execution**. Agar sebuah aplikasi dapa
 Setiap aplikasi harus didefinisikan sebagai fungsi `void` tanpa argumen dan menggunakan *state variable* untuk mengelola inisialisasi.
 
 ```cpp
-void app_nama_aplikasi() {
-    // [INIT] Berjalan sekali saat aplikasi dimuat
-    static bool initialized = false;
-    static uint32_t lastUpdate = 0;
+#include "../modules.h"
 
-    if (!initialized) {
-        d->fillScreen(BLACK);
-        // Setup peripheral, font, atau state awal di sini
-        initialized = true;
+void app_contoh() {
+    // 1. [INIT]
+    bool isRunning = true;
+    
+    // 2. [EVENT LOOP]
+    while (isRunning) {
+        M5.update();
+
+        // [EXIT] 
+        if (M5.BtnB.pressedFor(BTN_EXIT_TIMEOUT_MS)) {
+            break; 
+        }
+
+        // [LOGIC & UI] 
+        // ...
+
+        // [TASK YIELD] 
+        vTaskDelay(pdMS_TO_TICKS(20)); 
     }
 
-    // [EXIT] Mekanisme keluar standar RunOX (Hold B 2 detik)
-    if (M5.BtnB.pressedFor(2000)) {
-        initialized = false; // Reset state untuk pemanggilan berikutnya
-        load_app(app_launcher);
-        return;
-    }
-
-    // [LOOP] Eksekusi logika berdasarkan interval yang ditentukan di config.h
-    if (millis() - lastUpdate > SYS_LOOP_INTERVAL_MS || lastUpdate == 0) {
-        lastUpdate = millis();
-
-        d->startWrite();
-        // Render UI dan Logic utama di sini
-        d->endWrite();
-    }
+    // 3. [CLEANUP]
 }
 ```
 
-### 2. Cara Mendaftarkan  atau Melepas Aplikasi
+### 2. Cara Mendaftarkan atau Melepas Aplikasi
 
 RunOX menggunakan teknik **Link-time Optimization** melalui file `entries.x`. Ini memungkinkan modularitas tinggi tanpa perlu mengubah logika pada Base.
 
@@ -196,35 +192,3 @@ RunOX menggunakan teknik **Link-time Optimization** melalui file `entries.x`. In
     APP_ENTRY("Nama App1", nama_func_app_1)
     //APP_ENTRY("Nama App2", nama_func_app_2)
     ```
-    
-
----
-
-## Ekosistem Aplikasi Bawaan (Default Modules)
-
-RunOX menyertakan sekumpulan aplikasi *core* yang dirancang dengan prinsip efisiensi tinggi:
-
-### Clock (RTC BM8563)
-
-Aplikasi penunjuk waktu presisi tinggi yang memanfaatkan chip RTC internal.
-
-- **Fitur**: Tampilan waktu digital, pengaturan tanggal, dan sistem alarm.
-- **Optimasi**: Menggunakan fitur *Hysteresis Wake* (Layar menyala otomatis saat pergelangan tangan diangkat) untuk menghemat daya.
-
-> Di aplikasi ini tidak ada fitur untuk mengatur waktu, anda  perlu mengaturnya di dalama `void setup()` secara manual
-> 
-
-### Air Mouse (BLE HID + MPU6886)
-
-Mengubah M5StickC Plus2 menjadi mouse nirkabel berbasis gerakan.
-
-- **Fitur**: Kontrol kursor via sensor akselerometer dan giroskop.
-- **Optimasi**: Berjalan pada *Standar mode* (80MHz) untuk konsumsi daya rendah.
-
-### picotop (System Monitor)
-
-Alat monitoring sumber daya perangkat secara *real-time*.
-
-- **Metrik**: Penggunaan SRAM/PSRAM, Temperatur CPU, Frekuensi CPU, serta Voltase dan Persentase Baterai.
-- **Tujuan**: Debugging dan manajemen kesehatan perangkat saat menjalankan aplikasi berat.
-
